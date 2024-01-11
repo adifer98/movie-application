@@ -25,6 +25,13 @@ const updateUI = () => {
 };
 
 
+
+
+const removeCancellationBlock = () => {
+    deleteModalEl.classList.remove('visible');
+    removeBackdrop();
+}
+
 const makeDeletion = movieId => {
     let movieIndex = 0;
     for (const movie of movies) {
@@ -40,23 +47,23 @@ const makeDeletion = movieId => {
     movieListEl.children[movieIndex].remove();
     updateUI();
     console.log(movies);
+    removeCancellationBlock();
 }
+
+
 const deleteMovieElement = movieId => {
     deleteModalEl.classList.add('visible');
     showBackdrop();
     const noBtn = deleteModalEl.querySelector(".btn--passive");
-    const yesBtn = deleteModalEl.querySelector(".btn--danger");
+    let yesBtn = deleteModalEl.querySelector(".btn--danger");
 
+    yesBtn.replaceWith(yesBtn.cloneNode(true));
+    yesBtn = deleteModalEl.querySelector(".btn--danger");
 
-    noBtn.addEventListener('click', () => {
-        deleteModalEl.classList.remove('visible');
-        removeBackdrop();
-    });
-    yesBtn.addEventListener('click', () => {
-        makeDeletion(movieId);
-        deleteModalEl.classList.remove('visible');
-        removeBackdrop();
-    });
+    noBtn.removeEventListener('click', removeCancellationBlock);
+    noBtn.addEventListener('click', removeCancellationBlock);
+
+    yesBtn.addEventListener('click', makeDeletion.bind(null, movieId));
 };
 
 
@@ -98,7 +105,13 @@ const cancelBtnHandler = () => {
     removeAddModal();
     clearUserInputs();
 };
-const backdropClickHandler = ()  => removeAddModal();
+const backdropClickHandler = ()  => {
+    if (deleteModalEl.classList.contains("visible")) {
+        removeCancellationBlock();
+    } else {
+        removeAddModal();
+    }
+}
 
 const isRatingValid = movieRating => {
     return !(movieRating === '' || +movieRating < 1 || +movieRating > 5)
